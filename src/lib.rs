@@ -1,21 +1,20 @@
 #![warn(clippy::pedantic, missing_docs)]
 
-//! A zero-dependency pure rust prefix tree optimized for alphabets with at
-//! most 32 letters. Current implementation is not space efficient and could be
-//! further optimized. One approach is implementing a Patricia Tree that groups
-//! common prefixes together, ultimately compressing the tree. Another way is
-//! to use a clever character encoding technique, which could also reduce the
-//! number of buckets. Speed-wise, the current implementation can load over
-//! 400, 000 words in approximately 0.3 seconds and thus, is efficient enough
-//! for most applications. Searches for words are instantaneous. The downside,
-//! however, is that it took over 29, 000, 000 nodes for constructing this
-//! prefix tree.
+//! A zero-dependency pure Rust prefix tree optimized for an English alphabet.
+//! Current implementation is not space efficient and could be further
+//! optimized. One approach is implementing a Patricia tree that groups common
+//! prefixes together, ultimately compressing the tree. Another way is to use a
+//! clever character encoding technique, which could also reduce the number of
+//! buckets. Speed-wise, the current implementation can load over 400, 000
+//! words in under 0.3 seconds and thus, is efficient enough for most
+//! applications. Searches for words are instantaneous. The downside, however,
+//! is that it took over 29, 000, 000 nodes for constructing this prefix tree.
 
 /// `Node` is a type that represents a node for a prefix tree
 #[derive(Debug, Default)]
 pub struct Node {
     /// Buckets
-    pub buckets: [Option<Box<Node>>; 32],
+    pub buckets: [Option<Box<Node>>; 26],
     /// Marker to specify end of word
     pub is_word: bool,
 }
@@ -30,12 +29,10 @@ pub struct PrefixTree {
 }
 
 impl Default for PrefixTree {
-    /// A default implementation of `PrefixTree` contains a default `Node` and
-    /// `num_nodes` of 26
     fn default() -> Self {
         PrefixTree {
             root: Node::default(),
-            num_nodes: 32,
+            num_nodes: 26,
         }
     }
 }
@@ -67,22 +64,16 @@ impl PrefixTree {
     /// assert_eq!(pt.search(word), true);
     /// ```
     pub fn insert(&mut self, word: &str) {
-        // Get the root pointer
         let mut ptr = &mut self.root;
 
-        // Insert characters into a prefix tree
         for idx in word.chars().map(Self::to_index) {
-            // Check for `None` first
             if ptr.buckets[idx].is_none() {
-                self.num_nodes += 32;
+                self.num_nodes += 26;
                 ptr.buckets[idx] = Some(Box::new(Node::default()));
             }
-
-            // Dereference is safe since we already check before
             ptr = ptr.buckets[idx].as_deref_mut().unwrap();
         }
 
-        // Mark the end as end of word
         ptr.is_word = true;
     }
 
@@ -103,10 +94,8 @@ impl PrefixTree {
     /// assert_eq!(pt.search(word), true);
     /// ```
     pub fn search(&self, word: &str) -> bool {
-        // Get the root pointer
         let mut ptr = &self.root;
 
-        // Perform a search for a word
         for idx in word.chars().map(Self::to_index) {
             match &ptr.buckets[idx] {
                 Some(bucket) => ptr = bucket,
@@ -114,7 +103,6 @@ impl PrefixTree {
             }
         }
 
-        // End of word
         ptr.is_word
     }
 
@@ -138,10 +126,8 @@ impl PrefixTree {
     /// assert_eq!(pt.prefix(not_prefix), false);
     /// ```
     pub fn prefix(&self, word: &str) -> bool {
-        // Get the root pointer
         let mut ptr = &self.root;
 
-        // Perform a search for a word
         for idx in word.chars().map(Self::to_index) {
             match &ptr.buckets[idx] {
                 Some(bucket) => ptr = bucket,
@@ -149,7 +135,6 @@ impl PrefixTree {
             }
         }
 
-        // A word is a prefix if we do not early return
         true
     }
 
@@ -182,18 +167,18 @@ impl PrefixTree {
     ///
     /// pt.insert("hello");
     ///
-    /// // Total number of nodes is 6 * 32 = 192
-    /// assert_eq!(pt.nodes_total(), 192);
+    /// // Total number of nodes is 6 * 26 = 156
+    /// assert_eq!(pt.nodes_total(), 156);
     ///
     /// pt.insert("hell");
     ///
     /// // Total number of nodes is the same
-    /// assert_eq!(pt.nodes_total(), 192);
+    /// assert_eq!(pt.nodes_total(), 156);
     ///
     /// pt.insert("hellicopter");
     ///
-    /// // Total number of nodes is 192 + 7 * 32 = 416
-    /// assert_eq!(pt.nodes_total(), 416);
+    /// // Total number of nodes is 156 + 7 * 26 = 338
+    /// assert_eq!(pt.nodes_total(), 338);
     /// ```
     pub fn nodes_total(&self) -> u64 {
         self.num_nodes
@@ -255,6 +240,6 @@ mod tests {
         }
 
         // Make sure that total number of nodes is correct
-        assert_eq!(pt.nodes_total(), 1056);
+        assert_eq!(pt.nodes_total(), 858);
     }
 }
