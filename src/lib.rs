@@ -57,6 +57,7 @@ impl PrefixTree {
     ///
     /// ```
     /// let mut pt = pt::PrefixTree::default();
+    ///
     /// let word = "hello";
     ///
     /// pt.insert(word);
@@ -87,6 +88,7 @@ impl PrefixTree {
     ///
     /// ```
     /// let mut pt = pt::PrefixTree::default();
+    ///
     /// let word = "hello";
     ///
     /// pt.insert(word);
@@ -116,6 +118,7 @@ impl PrefixTree {
     ///
     /// ```
     /// let mut pt = pt::PrefixTree::default();
+    ///
     /// let word = "hello";
     /// let is_prefix = "he";
     /// let not_prefix = "ll";
@@ -144,6 +147,7 @@ impl PrefixTree {
     ///
     /// ```
     /// let mut pt = pt::PrefixTree::default();
+    ///
     /// let word = "hello";
     ///
     /// pt.insert(word);
@@ -191,30 +195,24 @@ mod tests {
 
     #[test]
     fn hello_world() {
-        // Initialize a prefix tree
         let mut pt = PrefixTree::default();
 
-        // Dummy words
         let hello = "hello";
         let world = "world";
 
-        // Insert values
         pt.insert(hello);
         pt.insert(world);
 
-        // Test `search`
         assert_eq!(pt.search(hello), true);
         assert_eq!(pt.search(world), true);
         assert_eq!(pt.search("hel"), false);
         assert_eq!(pt.search("orl"), false);
 
-        // Test `prefix`
         assert_eq!(pt.prefix("hel"), true);
         assert_eq!(pt.prefix("wor"), true);
         assert_eq!(pt.prefix("elh"), false);
         assert_eq!(pt.prefix("rol"), false);
 
-        // Test `clear`
         pt.clear();
 
         assert_eq!(pt.search(hello), false);
@@ -225,21 +223,16 @@ mod tests {
 
     #[test]
     fn sentence() {
-        // Initialize a prefix tree
         let mut pt = PrefixTree::default();
 
-        // Dummy words
         let sentence = "the quick brown fox jumps over the lazy dog";
 
-        // Insert into a prefix tree and test
         for word in sentence.split_whitespace() {
             pt.insert(word);
 
             assert_eq!(pt.search(word), true);
             assert_eq!(pt.prefix(word), true);
         }
-
-        // Make sure that total number of nodes is correct
         assert_eq!(pt.nodes_total(), 858);
     }
 }
