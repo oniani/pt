@@ -10,16 +10,16 @@
 //! applications. Searches for words are instantaneous. The downside, however,
 //! is that it took over 29, 000, 000 nodes for constructing this prefix tree.
 
-/// `Node` is a type that represents a node for a prefix tree
+/// `Node` is a type that represents a node for a prefix tree.
 #[derive(Debug, Default)]
 pub struct Node {
-    /// Buckets
+    /// Buckets.
     pub buckets: [Option<Box<Node>>; 26],
-    /// Marker to specify end of word
+    /// Marker to specify end of word.
     pub is_word: bool,
 }
 
-/// `PrefixTree` is a type that represents a prefix tree
+/// `PrefixTree` is a type that represents a prefix tree.
 #[derive(Debug)]
 pub struct PrefixTree {
     /// Root of the tree
@@ -38,30 +38,40 @@ impl Default for PrefixTree {
 }
 
 impl PrefixTree {
-    /// `to_index` returns an appropriate index based on character
-    ///
-    /// # Arguments
-    ///
-    /// * `char` - A character for which to calculate an index
-    fn to_index(c: char) -> usize {
-        (c as u8 - 97) as usize
-    }
-
-    /// `insert` inserts a word into a prefix tree
-    ///
-    /// # Arguments
-    ///
-    /// * `word` - A word to be inserted into a prefix tree
+    /// `new` creates a new prefix tree.
     ///
     /// # Example
     ///
     /// ```
-    /// let mut pt = pt::PrefixTree::default();
+    /// let pt = pt::PrefixTree::new();
+    /// dbg!(pt);
+    /// ```
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// `to_index` returns an appropriate index based on character.
     ///
+    /// # Arguments
+    ///
+    /// * `char` - A character for which to calculate an index.
+    fn to_index(c: char) -> usize {
+        (c as u8 - 97) as usize
+    }
+
+    /// `insert` inserts a word into a prefix tree.
+    ///
+    /// # Arguments
+    ///
+    /// * `word` - A word to be inserted into a prefix tree.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut pt = pt::PrefixTree::new();
     /// let word = "hello";
     ///
     /// pt.insert(word);
-    ///
     /// assert_eq!(pt.search(word), true);
     /// ```
     pub fn insert(&mut self, word: &str) {
@@ -78,21 +88,19 @@ impl PrefixTree {
         ptr.is_word = true;
     }
 
-    /// `search` searches for a word in a prefix tree
+    /// `search` searches for a word in a prefix tree.
     ///
     /// # Arguments
     ///
-    /// * `word` - A word to be searched in a prefix tree
+    /// * `word` - A word to be searched in a prefix tree.
     ///
     /// # Example
     ///
     /// ```
-    /// let mut pt = pt::PrefixTree::default();
-    ///
+    /// let mut pt = pt::PrefixTree::new();
     /// let word = "hello";
     ///
     /// pt.insert(word);
-    ///
     /// assert_eq!(pt.search(word), true);
     /// ```
     pub fn search(&self, word: &str) -> bool {
@@ -108,23 +116,22 @@ impl PrefixTree {
         ptr.is_word
     }
 
-    /// `prefix` searches for a prefix word in a prefix tree
+    /// `prefix` searches for a prefix word in a prefix tree.
     ///
     /// # Arguments
     ///
-    /// * `word` - A prefix word to be searched in a prefix tree
+    /// * `word` - A prefix word to be searched in a prefix tree.
     ///
     /// # Example
     ///
     /// ```
-    /// let mut pt = pt::PrefixTree::default();
+    /// let mut pt = pt::PrefixTree::new();
     ///
     /// let word = "hello";
     /// let is_prefix = "he";
     /// let not_prefix = "ll";
     ///
     /// pt.insert(word);
-    ///
     /// assert_eq!(pt.prefix(is_prefix), true);
     /// assert_eq!(pt.prefix(not_prefix), false);
     /// ```
@@ -141,47 +148,38 @@ impl PrefixTree {
         true
     }
 
-    /// `clear` clears a prefix tree
+    /// `clear` clears a prefix tree.
     ///
     /// # Example
     ///
     /// ```
-    /// let mut pt = pt::PrefixTree::default();
-    ///
+    /// let mut pt = pt::PrefixTree::new();
     /// let word = "hello";
     ///
     /// pt.insert(word);
-    ///
     /// assert_eq!(pt.search(word), true);
     ///
     /// pt.clear();
-    ///
     /// assert_eq!(pt.search(word), false);
     /// ```
     pub fn clear(&mut self) {
         self.root = Default::default();
     }
 
-    /// `nodes_total` returns a total number of `Node`s in a `PrefixTree`
+    /// `nodes_total` returns a total number of `Node`s in a `PrefixTree`.
     ///
     /// # Example
     ///
     /// ```
-    /// let mut pt = pt::PrefixTree::default();
+    /// let mut pt = pt::PrefixTree::new();
     ///
     /// pt.insert("hello");
-    ///
-    /// // Total number of nodes is 6 * 26 = 156
     /// assert_eq!(pt.nodes_total(), 156);
     ///
     /// pt.insert("hell");
-    ///
-    /// // Total number of nodes is the same
     /// assert_eq!(pt.nodes_total(), 156);
     ///
     /// pt.insert("hellicopter");
-    ///
-    /// // Total number of nodes is 156 + 7 * 26 = 338
     /// assert_eq!(pt.nodes_total(), 338);
     /// ```
     pub fn nodes_total(&self) -> u64 {
@@ -195,7 +193,7 @@ mod tests {
 
     #[test]
     fn hello_world() {
-        let mut pt = PrefixTree::default();
+        let mut pt = PrefixTree::new();
 
         let hello = "hello";
         let world = "world";
@@ -223,7 +221,7 @@ mod tests {
 
     #[test]
     fn sentence() {
-        let mut pt = PrefixTree::default();
+        let mut pt = PrefixTree::new();
 
         let sentence = "the quick brown fox jumps over the lazy dog";
 
