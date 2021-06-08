@@ -159,22 +159,25 @@ impl PrefixTree {
         true
     }
 
-    /// `clear` clears a prefix tree.
+    /// `nodes_total` returns a total number of `Node`s in a `PrefixTree`.
     ///
     /// # Example
     ///
     /// ```
     /// let mut pt = pt::PrefixTree::new();
-    /// let word = "hi";
     ///
-    /// pt.insert(word);
-    /// assert_eq!(pt.contains_word(word), true);
+    /// pt.insert("hello");
+    /// assert_eq!(pt.nodes_total(), 156);
     ///
-    /// pt.clear();
-    /// assert_eq!(pt.contains_word(word), false);
+    /// pt.insert("hell");
+    /// assert_eq!(pt.nodes_total(), 156);
+    ///
+    /// pt.insert("hellicopter");
+    /// assert_eq!(pt.nodes_total(), 338);
     /// ```
-    pub fn clear(&mut self) {
-        self.root = Node::default();
+    #[must_use]
+    pub fn nodes_total(&self) -> u64 {
+        self.num_nodes
     }
 
     /// `is_empty` checks whether a prefix tree is empty.
@@ -200,25 +203,22 @@ impl PrefixTree {
         self.root == Node::default()
     }
 
-    /// `nodes_total` returns a total number of `Node`s in a `PrefixTree`.
+    /// `clear` clears a prefix tree.
     ///
     /// # Example
     ///
     /// ```
     /// let mut pt = pt::PrefixTree::new();
+    /// let word = "hi";
     ///
-    /// pt.insert("hello");
-    /// assert_eq!(pt.nodes_total(), 156);
+    /// pt.insert(word);
+    /// assert_eq!(pt.contains_word(word), true);
     ///
-    /// pt.insert("hell");
-    /// assert_eq!(pt.nodes_total(), 156);
-    ///
-    /// pt.insert("hellicopter");
-    /// assert_eq!(pt.nodes_total(), 338);
+    /// pt.clear();
+    /// assert_eq!(pt.contains_word(word), false);
     /// ```
-    #[must_use]
-    pub fn nodes_total(&self) -> u64 {
-        self.num_nodes
+    pub fn clear(&mut self) {
+        self.root = Node::default();
     }
 }
 
