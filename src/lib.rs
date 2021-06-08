@@ -1,4 +1,4 @@
-#![warn(clippy::pedantic, missing_docs)]
+#![warn(clippy::all, clippy::pedantic, missing_docs)]
 
 //! A zero-dependency pure Rust prefix tree optimized for an English alphabet.
 //! Current implementation is not space efficient and could be further
@@ -46,16 +46,17 @@ impl PrefixTree {
     /// let pt = pt::PrefixTree::new();
     /// dbg!(pt);
     /// ```
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// `to_index` returns an appropriate index based on character.
+    /// `index` returns an appropriate index based on character.
     ///
     /// # Arguments
     ///
     /// * `char` - A character for which to calculate an index.
-    fn to_index(c: char) -> usize {
+    fn index(c: char) -> usize {
         (c as u8 - 97) as usize
     }
 
@@ -65,6 +66,10 @@ impl PrefixTree {
     ///
     /// * `word` - A word to be inserted into a prefix tree.
     ///
+    /// # Panics
+    ///
+    /// This function should never panic.
+    ///
     /// # Example
     ///
     /// ```
@@ -72,23 +77,27 @@ impl PrefixTree {
     /// let word = "hello";
     ///
     /// pt.insert(word);
-    /// assert_eq!(pt.search(word), true);
+    /// assert_eq!(pt.contains_word(word), true);
     /// ```
     pub fn insert(&mut self, word: &str) {
         let mut ptr = &mut self.root;
 
-        for idx in word.chars().map(Self::to_index) {
+        for idx in word.chars().map(Self::index) {
             if ptr.buckets[idx].is_none() {
                 self.num_nodes += 26;
                 ptr.buckets[idx] = Some(Box::new(Node::default()));
             }
+
+            // SAFETY: This is okay since we know that `ptr.buckets[idx]` is
+            // not `None`. In other words, calling `unwrap` on will not result
+            // in undefined behavior.
             ptr = ptr.buckets[idx].as_deref_mut().unwrap();
         }
 
         ptr.is_word = true;
     }
 
-    /// `search` searches for a word in a prefix tree.
+    /// `contains_word` searches for a word in a prefix tree.
     ///
     /// # Arguments
     ///
@@ -101,12 +110,13 @@ impl PrefixTree {
     /// let word = "hello";
     ///
     /// pt.insert(word);
-    /// assert_eq!(pt.search(word), true);
+    /// assert_eq!(pt.contains_word(word), true);
     /// ```
-    pub fn search(&self, word: &str) -> bool {
+    #[must_use]
+    pub fn contains_word(&self, word: &str) -> bool {
         let mut ptr = &self.root;
 
-        for idx in word.chars().map(Self::to_index) {
+        for idx in word.chars().map(Self::index) {
             match &ptr.buckets[idx] {
                 Some(bucket) => ptr = bucket,
                 None => return false,
@@ -116,7 +126,7 @@ impl PrefixTree {
         ptr.is_word
     }
 
-    /// `prefix` searches for a prefix word in a prefix tree.
+    /// `contains_prefix` searches for a prefix word in a prefix tree.
     ///
     /// # Arguments
     ///
@@ -132,13 +142,14 @@ impl PrefixTree {
     /// let not_prefix = "ll";
     ///
     /// pt.insert(word);
-    /// assert_eq!(pt.prefix(is_prefix), true);
-    /// assert_eq!(pt.prefix(not_prefix), false);
+    /// assert_eq!(pt.contains_prefix(is_prefix), true);
+    /// assert_eq!(pt.contains_prefix(not_prefix), false);
     /// ```
-    pub fn prefix(&self, word: &str) -> bool {
+    #[must_use]
+    pub fn contains_prefix(&self, word: &str) -> bool {
         let mut ptr = &self.root;
 
-        for idx in word.chars().map(Self::to_index) {
+        for idx in word.chars().map(Self::index) {
             match &ptr.buckets[idx] {
                 Some(bucket) => ptr = bucket,
                 None => return false,
@@ -157,13 +168,13 @@ impl PrefixTree {
     /// let word = "hello";
     ///
     /// pt.insert(word);
-    /// assert_eq!(pt.search(word), true);
+    /// assert_eq!(pt.contains_word(word), true);
     ///
     /// pt.clear();
-    /// assert_eq!(pt.search(word), false);
+    /// assert_eq!(pt.contains_word(word), false);
     /// ```
     pub fn clear(&mut self) {
-        self.root = Default::default();
+        self.root = Node::default();
     }
 
     /// `nodes_total` returns a total number of `Node`s in a `PrefixTree`.
@@ -182,6 +193,7 @@ impl PrefixTree {
     /// pt.insert("hellicopter");
     /// assert_eq!(pt.nodes_total(), 338);
     /// ```
+    #[must_use]
     pub fn nodes_total(&self) -> u64 {
         self.num_nodes
     }
@@ -201,22 +213,22 @@ mod tests {
         pt.insert(hello);
         pt.insert(world);
 
-        assert_eq!(pt.search(hello), true);
-        assert_eq!(pt.search(world), true);
-        assert_eq!(pt.search("hel"), false);
-        assert_eq!(pt.search("orl"), false);
+        assert_eq!(pt.contains_word(hello), true);
+        assert_eq!(pt.contains_word(world), true);
+        assert_eq!(pt.contains_word("hel"), false);
+        assert_eq!(pt.contains_word("orl"), false);
 
-        assert_eq!(pt.prefix("hel"), true);
-        assert_eq!(pt.prefix("wor"), true);
-        assert_eq!(pt.prefix("elh"), false);
-        assert_eq!(pt.prefix("rol"), false);
+        assert_eq!(pt.contains_prefix("hel"), true);
+        assert_eq!(pt.contains_prefix("wor"), true);
+        assert_eq!(pt.contains_prefix("elh"), false);
+        assert_eq!(pt.contains_prefix("rol"), false);
 
         pt.clear();
 
-        assert_eq!(pt.search(hello), false);
-        assert_eq!(pt.search(world), false);
-        assert_eq!(pt.prefix("hel"), false);
-        assert_eq!(pt.prefix("wor"), false);
+        assert_eq!(pt.contains_word(hello), false);
+        assert_eq!(pt.contains_word(world), false);
+        assert_eq!(pt.contains_prefix("hel"), false);
+        assert_eq!(pt.contains_prefix("wor"), false);
     }
 
     #[test]
@@ -228,9 +240,29 @@ mod tests {
         for word in sentence.split_whitespace() {
             pt.insert(word);
 
-            assert_eq!(pt.search(word), true);
-            assert_eq!(pt.prefix(word), true);
+            assert_eq!(pt.contains_word(word), true);
+            assert_eq!(pt.contains_prefix(word), true);
         }
         assert_eq!(pt.nodes_total(), 858);
+    }
+
+    #[test]
+    fn random_words() {
+        let mut pt = PrefixTree::new();
+
+        let words = vec!["afopsiv", "coxpz", "pqeacxnvzm", "zm", "acxk"];
+
+        for word in words {
+            pt.insert(word);
+
+            assert_eq!(pt.contains_word(word), true);
+            assert_eq!(pt.contains_prefix(word), true);
+
+            for idx in 1..word.len() {
+                assert_eq!(pt.contains_prefix(&word[..idx]), true);
+                assert_eq!(pt.contains_prefix(&word[idx..]), false);
+            }
+        }
+        assert_eq!(pt.nodes_total(), 728);
     }
 }
