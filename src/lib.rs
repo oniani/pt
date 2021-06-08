@@ -11,7 +11,7 @@
 //! is that it took over 29, 000, 000 nodes for constructing this prefix tree.
 
 /// `Node` is a type that represents a node for a prefix tree.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct Node {
     /// Buckets.
     pub buckets: [Option<Box<Node>>; 26],
@@ -165,7 +165,7 @@ impl PrefixTree {
     ///
     /// ```
     /// let mut pt = pt::PrefixTree::new();
-    /// let word = "hello";
+    /// let word = "hi";
     ///
     /// pt.insert(word);
     /// assert_eq!(pt.contains_word(word), true);
@@ -175,6 +175,29 @@ impl PrefixTree {
     /// ```
     pub fn clear(&mut self) {
         self.root = Node::default();
+    }
+
+    /// `is_empty` checks whether a prefix tree is empty.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let mut pt = pt::PrefixTree::new();
+    /// let word = "bye";
+    ///
+    /// assert_eq!(pt.is_empty(), true);
+    ///
+    /// pt.insert(word);
+    /// assert_eq!(pt.is_empty(), false);
+    /// assert_eq!(pt.contains_word(word), true);
+    ///
+    /// pt.clear();
+    /// assert_eq!(pt.contains_word(word), false);
+    /// assert_eq!(pt.is_empty(), true);
+    /// ```
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.root == Node::default()
     }
 
     /// `nodes_total` returns a total number of `Node`s in a `PrefixTree`.
@@ -229,6 +252,7 @@ mod tests {
         assert_eq!(pt.contains_word(world), false);
         assert_eq!(pt.contains_prefix("hel"), false);
         assert_eq!(pt.contains_prefix("wor"), false);
+        assert_eq!(pt.is_empty(), true);
     }
 
     #[test]
@@ -264,5 +288,8 @@ mod tests {
             }
         }
         assert_eq!(pt.nodes_total(), 728);
+
+        pt.clear();
+        assert_eq!(pt.is_empty(), true);
     }
 }
