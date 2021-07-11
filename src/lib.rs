@@ -1,5 +1,3 @@
-#![warn(clippy::all, clippy::pedantic, missing_docs)]
-
 //! A zero-dependency pure Rust prefix tree optimized for an English alphabet.
 //! Current implementation is not space efficient and could be further
 //! optimized. One approach is implementing a Patricia tree that groups common
@@ -9,6 +7,8 @@
 //! words in under 0.3 seconds and thus, is efficient enough for most
 //! applications. Searches for words are instantaneous. The downside, however,
 //! is that it took over 29, 000, 000 nodes for constructing this prefix tree.
+
+#![warn(clippy::all, clippy::pedantic, missing_docs)]
 
 /// `Node` is a type that represents a node for a prefix tree.
 #[derive(Debug, Default, PartialEq)]
