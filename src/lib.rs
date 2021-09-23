@@ -3,10 +3,10 @@
 //! optimized. One approach is implementing a Patricia tree that groups common
 //! prefixes together, ultimately compressing the tree. Another way is to use a
 //! clever character encoding technique, which could also reduce the number of
-//! buckets. Speed-wise, the current implementation can load over 400, 000
+//! buckets. Speed-wise, the current implementation can load over 400000
 //! words in under 0.3 seconds and thus, is efficient enough for most
 //! applications. Searches for words are instantaneous. The downside, however,
-//! is that it took over 29, 000, 000 nodes for constructing this prefix tree.
+//! is that it took over 29000000 nodes for constructing this prefix tree.
 
 #![warn(clippy::all, clippy::pedantic, missing_docs)]
 
@@ -236,23 +236,23 @@ mod tests {
         pt.insert(hello);
         pt.insert(world);
 
-        assert_eq!(pt.contains_word(hello), true);
-        assert_eq!(pt.contains_word(world), true);
-        assert_eq!(pt.contains_word("hel"), false);
-        assert_eq!(pt.contains_word("orl"), false);
+        assert!(pt.contains_word(hello));
+        assert!(pt.contains_word(world));
+        assert!(!pt.contains_word("hel"));
+        assert!(!pt.contains_word("orl"));
 
-        assert_eq!(pt.contains_prefix("hel"), true);
-        assert_eq!(pt.contains_prefix("wor"), true);
-        assert_eq!(pt.contains_prefix("elh"), false);
-        assert_eq!(pt.contains_prefix("rol"), false);
+        assert!(pt.contains_prefix("hel"));
+        assert!(pt.contains_prefix("wor"));
+        assert!(!pt.contains_prefix("elh"));
+        assert!(!pt.contains_prefix("rol"));
 
         pt.clear();
 
-        assert_eq!(pt.contains_word(hello), false);
-        assert_eq!(pt.contains_word(world), false);
-        assert_eq!(pt.contains_prefix("hel"), false);
-        assert_eq!(pt.contains_prefix("wor"), false);
-        assert_eq!(pt.is_empty(), true);
+        assert!(!pt.contains_word(hello));
+        assert!(!pt.contains_word(world));
+        assert!(!pt.contains_prefix("hel"));
+        assert!(!pt.contains_prefix("wor"));
+        assert!(pt.is_empty());
     }
 
     #[test]
@@ -264,8 +264,8 @@ mod tests {
         for word in sentence.split_whitespace() {
             pt.insert(word);
 
-            assert_eq!(pt.contains_word(word), true);
-            assert_eq!(pt.contains_prefix(word), true);
+            assert!(pt.contains_word(word));
+            assert!(pt.contains_prefix(word));
         }
         assert_eq!(pt.nodes_total(), 858);
     }
@@ -279,17 +279,17 @@ mod tests {
         for word in words {
             pt.insert(word);
 
-            assert_eq!(pt.contains_word(word), true);
-            assert_eq!(pt.contains_prefix(word), true);
+            assert!(pt.contains_word(word));
+            assert!(pt.contains_prefix(word));
 
             for idx in 1..word.len() {
-                assert_eq!(pt.contains_prefix(&word[..idx]), true);
-                assert_eq!(pt.contains_prefix(&word[idx..]), false);
+                assert!(pt.contains_prefix(&word[..idx]));
+                assert!(!pt.contains_prefix(&word[idx..]));
             }
         }
         assert_eq!(pt.nodes_total(), 728);
 
         pt.clear();
-        assert_eq!(pt.is_empty(), true);
+        assert!(pt.is_empty());
     }
 }
